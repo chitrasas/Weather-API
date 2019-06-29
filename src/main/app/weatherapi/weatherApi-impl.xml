@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <sub-flow name="get:/weather/byCityId:api-impl">
+        <set-variable variableName="cityId" value="#[message.inboundProperties.'http.query.params'.cityId]" doc:name="City ID"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/data/2.5/weather" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:query-param paramName="id" value="#[flowVars.cityId]"/>
+                <http:query-param paramName="appid" value="8843a199ef3408dee78b633bb9063790"/>
+            </http:request-builder>
+        </http:request>
+    </sub-flow>
+    <sub-flow name="get:/weather/byCityName:api-impl">
+        <set-variable variableName="cityName" value="#[message.inboundProperties.'http.query.params'.cityName]" doc:name="City Name"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/data/2.5/weather" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:query-param paramName="q" value="#[flowVars.cityName]"/>
+                <http:query-param paramName="appid" value="8843a199ef3408dee78b633bb9063790"/>
+            </http:request-builder>
+        </http:request>
+    </sub-flow>
+    <sub-flow name="get:/weather/byGeography:api-impl">
+        <set-variable variableName="lat" value="#[message.inboundProperties.'http.query.params'.lat]" doc:name="Latitude"/>
+        <set-variable variableName="lon" value="#[message.inboundProperties.'http.query.params'.lon]" doc:name="Longitude"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/data/2.5/weather" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:query-param paramName="lat" value="#[flowVars.lat]"/>
+                <http:query-param paramName="lon" value="#[flowVars.lon]"/>
+                <http:query-param paramName="appid" value="8843a199ef3408dee78b633bb9063790"/>
+            </http:request-builder>
+        </http:request>
+    </sub-flow>
+    <sub-flow name="get:/weather/byZipcode:api-impl">
+        <set-variable variableName="zipcode" value="#[message.inboundProperties.'http.query.params'.zipcode]" doc:name="Zipcode"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/data/2.5/weather" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:query-param paramName="zip" value="#[flowVars.zipcode]"/>
+                <http:query-param paramName="appid" value="8843a199ef3408dee78b633bb9063790"/>
+            </http:request-builder>
+        </http:request>
+    </sub-flow>
+    <sub-flow name="get:/forecast/byCityForecast:api-impl">
+        <set-variable variableName="cityName" value="#[message.inboundProperties.'http.query.params'.cityName]" doc:name="City Name"/>
+        <set-variable variableName="mode" value="#[message.inboundProperties.'http.query.params'.mode]" doc:name="Mode"/>
+        <set-variable variableName="date" value="#[message.inboundProperties.'http.query.params'.date]" doc:name="Date"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/data/2.5/forecast" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:query-param paramName="q" value="#[flowVars.cityName]"/>
+                <http:query-param paramName="mode" value="#[flowVars.mode]"/>
+                <http:query-param paramName="appid" value="8843a199ef3408dee78b633bb9063790"/>
+            </http:request-builder>
+        </http:request>
+        <dw:transform-message doc:name="Transform Message" metadata:id="edd5f359-4bff-48c3-9d80-88740092568f">
+            <dw:input-payload doc:sample="C:\Users\M1051619\Desktop\MULE tasks\OWM sample output\forecast output.json" mimeType="application/json"/>
+            <dw:input-variable doc:sample="sample_data\string.dwl" mimeType="application/java" variableName="date"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+payload.list filter ((($.dt as :datetime) as :string {format: "dd-MM-yyyy"}) == flowVars.date) map {
+	date_time: $.dt_txt,
+	min_temp: $.main.temp_min,
+	max_temp: $.main.temp_max
+	
+}
+]]></dw:set-payload>
+        </dw:transform-message>
+    </sub-flow>
+</mule>

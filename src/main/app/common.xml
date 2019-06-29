@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-platform-gw="http://www.mulesoft.org/schema/mule/api-platform-gw" xmlns:cluster="http://www.mulesoft.org/schema/mule/ee/cluster" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/api-platform-gw http://www.mulesoft.org/schema/mule/api-platform-gw/current/mule-api-platform-gw.xsd">
+	<http:listener-config name="api-httpListenerConfig"
+		host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration" />
+	<apikit:config name="api-config" raml="api.raml"
+		consoleEnabled="false" doc:name="Router" />
+	<http:request-config name="HTTP_Request_Configuration" host="api.openweathermap.org" port="80" doc:name="HTTP Request Configuration"/>
+    <configuration defaultExceptionStrategy-ref="Global_Exception_Strategy" doc:name="Configuration">
+        <http:config useTransportForUris="false"/>
+    </configuration>
+    <api-platform-gw:api apiName="groupId:d352bddf-96e6-4b0a-a05c-23c3f82a3a80:assetId:owm-practice-project" version="1.0.0:15669015" flowRef="api-main" create="true" apikitRef="api-config" doc:name="API Autodiscovery"/>
+</mule>
